@@ -1,0 +1,45 @@
+Activating conda environment...
+Running command:
+parrot-optimize "../test_seq_predictions/all_test_seqs.tsv" "../models/consensus_model_all_six.pt" "../test_seq_predictions/test_preds_parrot_all_six_model.csv" -d residues -c 1
+
+parrot-predict (version 1.7.5)
+...................................
+Developed by Dan Griffith
+   Holehouse lab, WUSTL
+
+
+Settings:
+...................................
+sequence_file : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/test_seq_predictions/all_test_seqs.tsv
+weights_file  : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/models/consensus_model_all_six.pt
+output_file   : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/test_seq_predictions/test_preds_parrot_all_six_model.csv
+hidden_size   : 10
+num_layers    : 1
+dtype         : residues
+num_classes   : 1
+problem_type  : regression
+encode        : onehot
+excludeSeqID  : False
+probabilistic_classification: False
+
+---> Starting predictions...
+
+On 0 of 45241
+On 1000 of 45241
+On 2000 of 45241
+Traceback (most recent call last):
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/lib/python3.9/site-packages/parrot/encode_sequence.py", line 48, in one_hot
+    m[i, ONE_HOT[seq[i]]] = 1
+KeyError: '7'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/bin/parrot-predict", line 178, in <module>
+    pred_dict = train_network.test_unlabeled_data(brnn_network, sequences, device,
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/lib/python3.9/site-packages/parrot/train_network.py", line 409, in test_unlabeled_data
+    seq_vector = encode_sequence.one_hot(seq)
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/lib/python3.9/site-packages/parrot/encode_sequence.py", line 51, in one_hot
+    raise ValueError(error_str)
+ValueError: Invalid amino acid detected: 7
+

@@ -1,0 +1,17 @@
+Activating conda environment...
+Running command:
+parrot-optimize "../test_seq_predictions/synthetics_test_seqs.tsv" "../models/consensus_model_no_sanjana.pt" "../test_seq_predictions/synthetics_preds_no_sanjana_model.csv" -d residues -c 1
+
+parrot-predict (version 1.7.5)
+...................................
+Developed by Dan Griffith
+   Holehouse lab, WUSTL
+
+
+Traceback (most recent call last):
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/bin/parrot-predict", line 101, in <module>
+    saved_weights = validate_args.check_file_exists(args.saved_network, 'Saved network')
+  File "/global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/conda/parrot_fixed/lib/python3.9/site-packages/parrot/tools/validate_args.py", line 23, in check_file_exists
+    raise FileNotFoundError(err_str)
+FileNotFoundError: Saved network does not exist.
+

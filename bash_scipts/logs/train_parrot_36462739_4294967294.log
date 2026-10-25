@@ -1,0 +1,43 @@
+Activating conda environment...
+Running command:
+parrot-train "../predictions/combined_preds/final_data/parrot_input_no_ADhunterLite.tsv" "../models/consensus_model_no_ADhunterLite.pt" -d residues -c 1 --epochs 10 --stop 'auto'
+Namespace(data_file='../predictions/combined_preds/final_data/parrot_input_no_ADhunterLite.tsv', output_network='../models/consensus_model_no_ADhunterLite.pt', datatype='residues', classes=1, hidden_size=10, num_layers=1, learning_rate=0.001, batch=32, epochs=10, split='', stop='auto', setFractions=[0.7, 0.15, 0.15], encode='onehot', excludeSeqID=False, probabilistic_classification=False, include_figs=False, ignore_metrics=False, forceCPU=False, gpu_id=None, ignore_warnings=False, save_splits=True, verbose=False, silent=False)
+
+#############################################
+WARNING: Dataset is skewed.
+
+
+This may cause model bias.
+
+#############################################
+
+
+PARROT with user-specified parameters
+-------------------------------------
+Validation set loss per epoch:
+Epoch 0	Loss 4.5219
+Epoch 5	Loss 3.8745
+Epoch 10	Loss 3.8905
+Epoch 15	Loss 3.6934
+Epoch 20	Loss 3.7661
+Epoch 25	Loss 3.6413
+Epoch 30	Loss 3.6243
+Epoch 35	Loss 3.6780
+Epoch 40	Loss 3.6416
+Epoch 45	Loss 3.5920
+Epoch 50	Loss 3.6335
+Epoch 55	Loss 3.5843
+Epoch 60	Loss 3.5923
+Epoch 65	Loss 3.5757
+Epoch 70	Loss 3.5829
+Epoch 75	Loss 3.5836
+Epoch 80	Loss 3.5805
+Epoch 85	Loss 3.5966
+Epoch 90	Loss 3.5920
+Epoch 95	Loss 3.5665
+Epoch 100	Loss 3.5600
+Epoch 105	Loss 3.5778
+Epoch 110	Loss 3.5687
+
+Test Loss: 0.0074
+

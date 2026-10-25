@@ -1,0 +1,4 @@
+Activating conda environment...
+Running command:
+parrot-train "../predictions/combined_preds/final_data/parrot_input_no_composition.tsv" "../models/consensus_model_no_composition.pt" -d residues -c 1 --epochs 10 --stop 'auto'
+[2026-07-07T16:27:57.716] error: *** JOB 35560672 ON n0138.savio3 CANCELLED AT 2026-07-07T16:27:57 DUE to SIGNAL Terminated ***

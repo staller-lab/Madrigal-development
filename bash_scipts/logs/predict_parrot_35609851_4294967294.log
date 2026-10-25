@@ -1,0 +1,75 @@
+Activating conda environment...
+Running command:
+parrot-optimize "../test_seq_predictions/all_test_seqs.tsv" "../models/consensus_model_no_sanjana.pt" "../test_seq_predictions/all_test_preds_no_sanjana_model.csv" -d residues -c 1
+
+parrot-predict (version 1.7.5)
+...................................
+Developed by Dan Griffith
+   Holehouse lab, WUSTL
+
+
+Settings:
+...................................
+sequence_file : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/test_seq_predictions/all_test_seqs.tsv
+weights_file  : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/models/consensus_model_no_sanjana.pt
+output_file   : /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor/test_seq_predictions/all_test_preds_no_sanjana_model.csv
+hidden_size   : 10
+num_layers    : 1
+dtype         : residues
+num_classes   : 1
+problem_type  : regression
+encode        : onehot
+excludeSeqID  : False
+probabilistic_classification: False
+
+---> Starting predictions...
+
+On 0 of 45241
+On 1000 of 45241
+On 2000 of 45241
+On 3000 of 45241
+On 4000 of 45241
+On 5000 of 45241
+On 6000 of 45241
+On 7000 of 45241
+On 8000 of 45241
+On 9000 of 45241
+On 10000 of 45241
+On 11000 of 45241
+On 12000 of 45241
+On 13000 of 45241
+On 14000 of 45241
+On 15000 of 45241
+On 16000 of 45241
+On 17000 of 45241
+On 18000 of 45241
+On 19000 of 45241
+On 20000 of 45241
+On 21000 of 45241
+On 22000 of 45241
+On 23000 of 45241
+On 24000 of 45241
+On 25000 of 45241
+On 26000 of 45241
+On 27000 of 45241
+On 28000 of 45241
+On 29000 of 45241
+On 30000 of 45241
+On 31000 of 45241
+On 32000 of 45241
+On 33000 of 45241
+On 34000 of 45241
+On 35000 of 45241
+On 36000 of 45241
+On 37000 of 45241
+On 38000 of 45241
+On 39000 of 45241
+On 40000 of 45241
+On 41000 of 45241
+On 42000 of 45241
+On 43000 of 45241
+On 44000 of 45241
+On 45000 of 45241
+
+---> Prediction complete!
+
