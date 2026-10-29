@@ -2,20 +2,12 @@
 
 CADNN is a bidirectional LSTM (trained with PARROT) that takes a protein sequence of any length and predicts, for each residue, the fraction of six activation domain (AD) predictors that call that residue part of an AD. The six predictors are:
 
-- PADDLE
-- TADA
-- ADpred
-- ADhunterLite
-- ADhunterEnsemble
-- Kotha Composition Model
-
-Work is split across two project directories on Savio:
-
-```
-SANJANA = /global/scratch/projects/fc_mvslab/OpenProjects/Sanjana/consensus_AD_predictor
-CLAIRE  = /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predictor
-```
-
+- PADDLE (doi: 10.7554/eLife.68068) 
+- TADA (doi: 10.1038/s41586-024-07707-3) 
+- ADpred (doi: 10.1016/j.molcel.2020.04.020) 
+- ADhunterLite (doi: 10.1371/journal.pgen.1012069) 
+- ADhunterEnsemble (doi: 10.1186/s13059-026-04269-7)
+- Kotha Composition Model (doi: 10.1093/genetics/iyad131) 
 ---
 
 ## Pipeline overview
@@ -45,31 +37,14 @@ CLAIRE  = /global/scratch/projects/fc_mvslab/OpenProjects/Claire/consensus_predi
 ### 1. Input sequences
 
 - **Y1000+ yeast** (n = 172,854): homologs of *S. cerevisiae* TFs.
-  - File: `SANJANA/output/cl_seqs.fasta`
+  - File: `notebooks/data/cl_seqs.fasta`
 - **PlantTFDB** (n = 310,656):
-  - File: `SANJANA/PlantTFDB-all_TF_pep.fas`
+  - File: `notebooks/data/PlantTFDB-all_TF_pep.fas`
 - **InterPro** (n = 137,436):
   1. Took DBD families from Lambert et al. 2018, keeping families with more than one known human TF and dropping duplicates and the "unknown" category.
   2. Mapped each family to an InterPro domain or superfamily. The mapping is tracked in a Google Sheet.
   3. Pulled UniProt sequences with evidence levels 1 and 2.
-  - File: `SANJANA/output/interpro_uniprot_evid_1_2.fasta`
-
-### 5. Test sets
-
-Test sets came from screens that were not used to train any of the individual predictors:
-
-- **ARF** (Morffy et al.): Supplementary Table S3.
-- **Sanborn**: sub-libraries D and E only. Sub-libraries A and B were used to train PADDLE.
-- **Hummel**: `hummel_ratio_20230530`. This set was included in the overlap filter but was not used for final evaluation, because ADhunterEnsemble was trained on it.
-- **Erkine / Ravarani**: supplementary tables of measured activities.
-- **Arnold**: fold change ≥ 1.5 and P ≤ 1e-5, using tables EV2, EV4, EV5, and EV6.
-- **DelRosso**: 25 randomly chosen TFs out of 1,241. We used a subset so that most human TFs stay in the training data.
-- **Sog1**
-- **Synthetics**
-
-Activities for the test tiles are in `SANJANA/output/screen_test_seqs_with_activities.csv`.
-
-> **Note on DelRosso:** a merge bug mapped about 1,200 tiles to the 25 DelRosso TFs instead of the correct ~800. All ~1,200 tiles were used when removing training sequences, which removed roughly 3,000 extra training sequences. We did not redo the clustering, because the predictions had already been run. The activities file above uses the correct 804 tiles.
+  - File: `data/interpro_uniprot_evid_1_2.fasta`
 
 ### 9–10. Running predictors and building consensus
 
@@ -98,106 +73,72 @@ Models trained:
 - The all-six model.
 - Leave-one-out models, each dropping one predictor.
 
-Before training, we removed the 17 full-length TFs (*Saccharomyces* orthologs plus P07249) that are in the PADDLE test set.
+Before training, we removed the 17 full-length TFs (*Saccharomyces* orthologs plus P07249) that are in the PADDLE test set. These sequences were not part of the original test set, but they were added after we realized that because they were not used to train PADDLE and we could use them in our test set. 
 
 ### 13. Evaluation
 
 - **Classification:** residue-level PRC and ROC on full-length TFs with known ADs.
 
-  | Dataset | Full-length TFs |
-  |---|---|
-  | Yeast | 16 |
-  | Fly | 49 |
-  | Plant | 356 |
-  | Human | 25 |
+  | Dataset | Full-length TFs | Total Residues
+  |---|---|---|---|
+  | Yeast | 16 | 12,981
+  | Fly | 49 | 33,772
+  | Plant | 355 | 101,141
+  | Human | 25 | 13,895
 
 - **Regression:** Pearson and Spearman correlation against screen tile activities. When a tile was longer than a predictor's input, we scored the tile's sub-tiles and took the mean or the max.
 
+These sequences were used to test the regressive power of our trained model. There is some overlap with the sequences/screens that we used to train the classification model (see below). 
+
+- **ARF** (Morffy et al.): Supplementary Table S3.
+- **Sanborn**: sub-libraries D and E only. Sub-libraries A and B were used to train PADDLE.
+- **Hummel**: `hummel_ratio_20230530`. This set was included in the overlap filter but was not used for final evaluation, because ADhunterEnsemble was trained on it.
+- **Erkine / Ravarani**: supplementary tables of measured activities.
+- **Arnold**: fold change ≥ 1.5 and P ≤ 1e-5, using tables EV2, EV4, EV5, and EV6.
+- **DelRosso**: 25 randomly chosen TFs out of 1,241. We used a subset so that most human TFs stay in the training data.
+- **Sog1**
+- **Synthetics**
+
+Activities for the test tiles are in `notebooks/regression/screen_test_seqs_with_activities.csv`.
+
+> **Note on DelRosso:** a merge bug mapped about 1,200 tiles to the 25 DelRosso TFs instead of the correct ~800. All ~1,200 tiles were used when removing training sequences, which removed roughly 3,000 extra training sequences. We did not redo the clustering, because the predictions had already been run. The activities file above uses the correct 804 tiles.
+
 ---
 
-## Notebooks
+## Workflow (notebooks and bash scripts)
 
-### In `SANJANA/notebooks/`
-
-| Notebook | What it does |
+| Code | What it does |
 |---|---|
-| `00_Downloading all InterPro-superfamilies.ipynb` | Downloads UniProt sequences (evidence levels 1 and 2) for the InterPro codes matching the Lambert 2018 DBD families |
-| `01_Input data clusters.ipynb` | Combines the three sources, de-duplicates, and applies the length and disorder filters |
-| `02_Input data clusters with mimum sequence identity.ipynb` | Clusters sequences with mmseqs2 at 75% identity ("Running mmseqs2" section) |
-| `03_Generating test set.ipynb` | Builds the test set from the published screens, then removes test-similar training sequences with mmseqs search ("Trying mmseqs search instead" section) |
-| `04_Removing synthetics from training.ipynb` | Removes training sequences similar to the synthetic sequences |
-| `05_Running predictors on train with test removed.ipynb` | Drops the Y1000+ (CL) sequences and splits the rest into chunks of 1,000 for prediction |
-| `06_Binarized predictions to traces.ipynb` | Binarizes predictor outputs and converts them into per-residue consensus traces, producing the PARROT input |
-| `07_Masking structured regions.ipynb` | Makes the folded-domain-masked version of the training input using metapredict2 |
-| `Evaluation datasets.ipynb` | Plots predicted vs. measured activity for the consensus models and the individual predictors on each screen |
-| `Eval consensus model.ipynb` | Counts TP and FP on human TFs (work in progress) |
-
-### In `CLAIRE/`
-
-| Notebook | What it does |
-|---|---|
-| `checking_seq_sets.ipynb` | Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655) |
+| `notebooks/00_Downloading all InterPro-superfamilies.ipynb` | Downloads UniProt sequences (evidence levels 1 and 2) for the InterPro codes matching the Lambert 2018 DBD families |
+| `notebooks/01_Input data clusters.ipynb` | Combines the three sources, de-duplicates, and applies the length and disorder filters |
+| `notebooks/02_Input data clusters with mimum sequence identity.ipynb` | Clusters sequences with mmseqs2 at 75% identity ("Running mmseqs2" section) |
+| `notebooks/03_Generating test set.ipynb` | Builds the test set from the published screens, then removes test-similar training sequences with mmseqs search ("Trying mmseqs search instead" section) |
+| `notebooks/04_Removing synthetics from training.ipynb` | Removes training sequences similar to the synthetic sequences |
+| `notebooks/05_Running predictors on train with test removed.ipynb` | Drops the Y1000+ (CL) sequences and splits the rest into chunks of 1,000 for prediction |
+| `bash_scripts/run_CL_dask_all_split.sh` | Runs the predictors (parallelized with Dask) on the chunked training sequences |
+| `bash_scripts/run_CL_dask_all_split_on_missing.sh` | Re-runs the predictors on any chunks or tiles missing from the first run |
+| `bash_scripts/run_adhunter_ensemble_gpu.sh` | Runs ADhunterEnsemble on the GPU for each sequence chunk (ADhunterEnsemble is not implemented in dask)|
+| `bash_scripts/make_consensus.sh` | Combines the six predictors into consensus files for each chunk, for the all-six set and each leave-one-out set. Calls python script `other_scripts/generate_consensus_prediction_v2.py` |
+| `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv
+tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv`| Combines all the predictions into a single file. Similar commands were running for the leave-one-out models.  
+| `notebooks/checking_seq_sets.ipynb` | Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655) |
 | `loading_and_filtering_yeast_preds.ipynb` | Pulls the predictions for the filtered Y1000+ sequences |
 | `make_parrot_input.ipynb` | Combines all predictions and writes the PARROT input files, one for the all-six model and one for each leave-one-out model |
-
----
-
-## Bash scripts
-
-### In `SANJANA/scripts/jobs/`
-
-| Script | What it does |
-|---|---|
-| `run_CL_dask_all_split.sh` | Runs the predictors (parallelized with Dask) on the chunked training sequences |
-| `run_CL_dask_all_split_on_missing.sh` | Re-runs the predictors on any chunks or tiles missing from the first run |
-| `run_CL_dask_test_screen_seqs.sh` | Runs the predictors on the test screen sequences |
-| `train_parrot.sh` | Trains the original PARROT consensus model |
-
-### In `CLAIRE/`
-
-| Script | What it does |
-|---|---|
-| `run_adhunter_ensemble_gpu.sh` | Runs ADhunterEnsemble on the GPU for each sequence chunk |
-| `make_consensus.sh` | Combines the six predictors into consensus files for each chunk, for the all-six set and each leave-one-out set |
 | `train_parrot_all_six.sh` | Trains the final CADNN model on all six predictors |
 | `train_parrot_no_<predictor>.sh` | Trains the leave-one-out models. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
-
-To merge the per-chunk consensus files, run the following from `CLAIRE/predictions/combined_preds`, once for each variant:
-
-```bash
-head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv
-tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv
-```
+| `predict_parrot_all_six.sh` | Runs parrot on the test sequences for regression. |
+| `predict_parrot_no_<predictor>.sh` | Runs leave-one-out models on test sequences for regression. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
 
 ---
 
 ## Key files
 
-### Training data, in `SANJANA/`
+### Final PARROT inputs, in `compressed_data`
 
 | File | Contents |
 |---|---|
-| `data/CL_SK_plant_input.fasta` | Sequences after the length filter |
-| `data/CL_SK_plant_seqs_disord_thresh.fasta` | Sequences after the disorder filter |
-| `output/mmseqs/CL_SK_plant_seqs_disord_thresh_DB_clu_id75.tsv` | mmseqs2 clusters |
-| `data/train_seqs_with_test_overlap_removed.fasta` | Training sequences with test-similar sequences removed |
-| `data/train_seqs_with_test_synthetics_overlap_removed.fasta` | Final training sequences (230,302) |
-| `data/non_cl_train_seqs_split/pt*.fasta` | Training sequence chunks used for prediction |
-
-### Predictions and PARROT input, in `SANJANA/`
-
-| File | Contents |
-|---|---|
-| `output/train_seqs_with_test_overlap_removed_sk_only/` | Predictions on the training sequences |
-| `output/screen_test_seqs_preds/` | Predictions on the test screen sequences |
-| `output/parrot_input_test_synthetics_removed.tsv` | Original PARROT input (without ADhunterEnsemble) |
-
-### Final PARROT inputs, in `CLAIRE/predictions/combined_preds/final_data/`
-
-| File | Contents |
-|---|---|
-| `parrot_input_all_six.tsv` | Input for the final model (230,289 sequences) |
-| `parrot_input_no_<predictor>.tsv` | Inputs for the leave-one-out models |
+| `parrot_input_all_six.tsv.gz` | Input for the final model (230,289 sequences) |
+| `parrot_input_no_<predictor>.tsv.gz` | Inputs for the leave-one-out models |
 
 ---
 
@@ -205,3 +146,9 @@ tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv
 
 - **Missing sequences:** the final inputs have 230,289 sequences, 13 fewer than the 230,302 in the training set. The missing names are listed in `CLAIRE/missing_seqs.txt`.
 - **DelRosso over-removal:** the training set is missing about 3,000 extra sequences because of the DelRosso tile bug described in step 5.
+
+## Notebooks that were used for development/testing/etc. but did not appear in the final workflow
+| `06_Binarized predictions to traces.ipynb` | Binarizes predictor outputs and converts them into per-residue consensus traces, producing the PARROT input |
+| `07_Masking structured regions.ipynb` | Makes the folded-domain-masked version of the training input using metapredict2 |
+| `Evaluation datasets.ipynb` | Plots predicted vs. measured activity for the consensus models and the individual predictors on each screen |
+| `Eval consensus model.ipynb` | Counts TP and FP on human TFs (work in progress) |

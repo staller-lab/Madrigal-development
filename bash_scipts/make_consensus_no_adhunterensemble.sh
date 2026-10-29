@@ -28,4 +28,4 @@
 source activate /global/scratch/users/claireleblanc/conda_environments/dask_v3
 
 echo "Starting preds"
-python "/global/scratch/users/claireleblanc/scripts/generate_consesnus_prediction_v2.py" -p "pt${SLURM_ARRAY_TASK_ID}" -d "../predictions" -o "combined_preds/pt${SLURM_ARRAY_TASK_ID}_combined_no_ADhunterEnsemble.csv" -ah -ap -t -pa -c
+python "../other_scripts/generate_consesnus_prediction_v2.py" -p "pt${SLURM_ARRAY_TASK_ID}" -d "../predictions" -o "combined_preds/pt${SLURM_ARRAY_TASK_ID}_combined_no_ADhunterEnsemble.csv" -ah -ap -t -pa -c
