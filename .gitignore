@@ -3,3 +3,5 @@ predictions/*
 logs/*
 IDRome/*
 models/version_1
+notebooks/checking_data.ipynb
+models/*_predictions.tsv
