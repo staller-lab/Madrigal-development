@@ -10,6 +10,14 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
 - **Kotha Composition Model** (doi: 10.1093/genetics/iyad131) 
 ---
 
+To run Madrigal online, visit: https://www.madrigal-predictor.net
+
+To run Madrigal as a python package, visit: https://pypi.org/project/madrigal-predictor/
+
+This repository contains the code used to create and evaluate Madrigal. If you run into any questions or issues with the code, please email claireleblanc [at] berkeley.edu or submit a github issue. 
+
+---
+
 ## Pipeline overview
 
 | Step | What happened | What code was used |
