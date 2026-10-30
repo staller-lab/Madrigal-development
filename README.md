@@ -10,6 +10,14 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
 - **Kotha Composition Model** (doi: 10.1093/genetics/iyad131) 
 ---
 
+To run Madrigal online, visit: https://www.madrigal-predictor.net
+
+To run Madrigal as a python package, visit: https://pypi.org/project/madrigal-predictor/
+
+This repository contains the code used to create and evaluate Madrigal. If you run into any questions or issues with the code, please email claireleblanc [at] berkeley.edu or submit a github issue. 
+
+---
+
 ## Pipeline overview
 
 | Step | What happened | What code was used |
@@ -19,7 +27,7 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
 | 3 | Clustered with `mmseqs cluster` at 75% identity, kept one representative per cluster | `notebooks/02_Input_data_clusters_with_mimum_sequence_identity.ipynb` |
 | 5 | Removed training sequences similar to test screen sequences | `notebooks/03_Generating_test_set.ipynb` |
 | 6 | Removed training sequences similar to synthetic sequences | `notebooks/04_Removing_synthetics_from_training.ipynb` |
-| 7 | Split sequences into chunks of 1,000. This was to speed up the predictions and avoid memory errors. | `notebooks/05_Running_predictors_on_train_with_test_removed.ipynb` | 
+| 7 | Split sequences into chunks of 1,000. This was to speed up the predictions and avoid memory errors. | `notebooks/05_split_seqs_into_smaller_files.ipynb` | 
 | 8 | Ran all six predictors on the training and test sequences |`bash_scripts/run_CL_dask_all_split.sh`, `bash_scripts/run_CL_dask_all_split_on_missing.sh`, `bash_scripts/run_adhunter_ensemble_gpu.sh`, |
 | 9 | Combined all six predictors into a consensus prediction (the fraction of residues that each predictor predicts as part of an activation domain) | `bash_scripts/make_consensus.sh`, To combine separate parts: `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv`, `tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv` |
 | 10 | Filter the sequences to make sure we have the correct sets. Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter was added, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655). | `notebooks/checking_seq_sets.ipynb` |
@@ -74,7 +82,7 @@ Before training, we removed the 17 full-length TFs (*Saccharomyces* orthologs pl
 - **Classification:** residue-level PRC and ROC on full-length TFs with known ADs.
 
   | Dataset | Full-length TFs | Total Residues
-  |---|---|---|---|
+  |---|---|---|
   | Yeast | 16 | 12,981
   | Fly | 49 | 33,772
   | Plant | 355 | 101,141
@@ -90,7 +98,6 @@ These sequences were used to test the regressive power of our trained model. The
 - **Erkine / Ravarani**: supplementary tables of measured activities.
 - **Arnold**: fold change ≥ 1.5 and P ≤ 1e-5, using tables EV2, EV4, EV5, and EV6.
 - **DelRosso**: 25 randomly chosen TFs out of 1,241. We used a subset so that most human TFs stay in the training data.
-- **Sog1**
 - **Synthetics**
 
 Activities for the test tiles are in `notebooks/regression/screen_test_seqs_with_activities.csv`.
