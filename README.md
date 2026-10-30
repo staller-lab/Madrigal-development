@@ -12,21 +12,22 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
 
 ## Pipeline overview
 
-| Step | What happened | Sequences remaining |
-|---|---|---|
-| 1 | Collected sequences from Y1000+ yeast, PlantTFDB, and InterPro (DBD families), then de-duplicated | 583,621 |
-| 2 | Length filter: 53 aa (PADDLE minimum) to 1,442 aa (99th percentile) | 576,616 |
-| 3 | Disorder filter: at least 20% predicted disorder | 497,983 |
-| 4 | Clustered with `mmseqs cluster` at 75% identity, kept one representative per cluster | 243,151 |
-| 5 | Compiled test sets from published screens | — |
-| 6 | Removed training sequences similar to test screen sequences | 232,797 |
-| 7 | Removed training sequences similar to synthetic sequences | 230,302 |
-| 8 | Split sequences into chunks of 1,000 | — |
-| 9 | Ran all six predictors on the training and test sequences | — |
-| 10 | Binarized predictions and combined them into per-residue consensus traces | — |
-| 11 | Made an alternative input with folded domains masked to zero (metapredict2) | — |
-| 12 | Removed PADDLE test-set TFs, then trained PARROT (the full model plus leave-one-out models) | 230,289 |
-| 13 | Evaluated on full-length TFs and on screen tiles | — |
+| Step | What happened | What code was used | Sequences remaining |
+|---|---|---|---|
+| 1 | Collected sequences from Y1000+ yeast, PlantTFDB, and InterPro (DBD families), then de-duplicated | `notebooks/00_Downloading all InterPro-superfamilies.ipynb` | 583,621 |
+| 2 | Filter the sequences based on length and disorder. Length filter: 53 aa (PADDLE minimum) to 1,442 aa (99th percentile). Disorder filter: at least 20% predicted disorder | `notebooks/01_Input_data_clusters.ipynb` | 497,983 |
+| 3 | Clustered with `mmseqs cluster` at 75% identity, kept one representative per cluster | `notebooks/02_Input_data_clusters_with_mimum_sequence_identity.ipynb` | 243,151 |
+| 5 | Removed training sequences similar to test screen sequences | `notebooks/03_Generating_test_set.ipynb` | 232,797 |
+| 6 | Removed training sequences similar to synthetic sequences | `notebooks/04_Removing_synthetics_from_training.ipynb` | 230,302 |
+| 7 | Split sequences into chunks of 1,000. This was to speed up the predictions and avoid memory errors. | `notebooks/05_Running_predictors_on_train_with_test_removed.ipynb` | — |
+| 8 | Ran all six predictors on the training and test sequences |`bash_scripts/run_CL_dask_all_split.sh`, `bash_scripts/run_CL_dask_all_split_on_missing.sh`, `bash_scripts/run_adhunter_ensemble_gpu.sh`, | — |
+| 9 | Combined all six predictors into a consensus prediction (the fraction of residues that each predictor predicts as part of an activation domain) | `bash_scripts/make_consensus.sh`, To combine separate parts: `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv`, `tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv` | — |
+| 10 | This was an extra step that filters to make sure that all the sequences that should be there are in the final prediction files.  `notebooks/checking_seq_sets.ipynb` | Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter was added, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655) |
+| `loading_and_filtering_yeast_preds.ipynb` | Pulls the predictions for the filtered Y1000+ sequences |
+| `make_parrot_input.ipynb` | Combines all predictions and writes the PARROT input files, one for the all-six model and one for each leave-one-out model |
+
+| 11 | Removed PADDLE test-set TFs, then trained PARROT (the full model plus leave-one-out models) | 230,289 |
+| 12 | Evaluated on full-length TFs and on screen tiles | — |
 
 **Overlap filter used in steps 6 and 7:** a training sequence was removed if it covered more than 90% of a test or synthetic sequence at 30% or higher sequence identity (`mmseqs search`).
 
