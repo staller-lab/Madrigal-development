@@ -74,7 +74,7 @@ Before training, we removed the 17 full-length TFs (*Saccharomyces* orthologs pl
 - **Classification:** residue-level PRC and ROC on full-length TFs with known ADs.
 
   | Dataset | Full-length TFs | Total Residues
-  |---|---|---|---|
+  |---|---|---|
   | Yeast | 16 | 12,981
   | Fly | 49 | 33,772
   | Plant | 355 | 101,141
