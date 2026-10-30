@@ -1,6 +1,6 @@
-# CADNN: Consensus Activation Domain Neural Network
+# Madrigal: Multi-model Activation Domain Recurrent-neural-network Inferring Grouped Activity Labels
 
-CADNN is a bidirectional LSTM (trained with PARROT) that takes a protein sequence of any length and predicts, for each residue, the fraction of six activation domain (AD) predictors that call that residue part of an AD. The six predictors are:
+Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequence of any length and predicts, for each residue, the fraction of six activation domain (AD) predictors that call that residue part of an AD. The six predictors are:
 
 - PADDLE (doi: 10.7554/eLife.68068) 
 - TADA (doi: 10.1038/s41586-024-07707-3) 
@@ -124,7 +124,7 @@ tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv`| Com
 | `notebooks/checking_seq_sets.ipynb` | Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655) |
 | `loading_and_filtering_yeast_preds.ipynb` | Pulls the predictions for the filtered Y1000+ sequences |
 | `make_parrot_input.ipynb` | Combines all predictions and writes the PARROT input files, one for the all-six model and one for each leave-one-out model |
-| `train_parrot_all_six.sh` | Trains the final CADNN model on all six predictors |
+| `train_parrot_all_six.sh` | Trains the final Madrigal model on all six predictors |
 | `train_parrot_no_<predictor>.sh` | Trains the leave-one-out models. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
 | `predict_parrot_all_six.sh` | Runs parrot on the test sequences for regression. |
 | `predict_parrot_no_<predictor>.sh` | Runs leave-one-out models on test sequences for regression. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
