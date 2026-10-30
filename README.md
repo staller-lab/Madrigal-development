@@ -12,21 +12,21 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
 
 ## Pipeline overview
 
-| Step | What happened | What code was used | Sequences remaining |
-|---|---|---|---|
-| 1 | Collected sequences from Y1000+ yeast, PlantTFDB, and InterPro (DBD families), then de-duplicated | `notebooks/00_Downloading_all_InterPro-superfamilies.ipynb` | 583,621 |
-| 2 | Filter the sequences based on length and disorder. Length filter: 53 aa (PADDLE minimum) to 1,442 aa (99th percentile). Disorder filter: at least 20% predicted disorder | `notebooks/01_Input_data_clusters.ipynb` | 497,983 |
-| 3 | Clustered with `mmseqs cluster` at 75% identity, kept one representative per cluster | `notebooks/02_Input_data_clusters_with_mimum_sequence_identity.ipynb` | 243,151 |
-| 5 | Removed training sequences similar to test screen sequences | `notebooks/03_Generating_test_set.ipynb` | 232,797 |
-| 6 | Removed training sequences similar to synthetic sequences | `notebooks/04_Removing_synthetics_from_training.ipynb` | 230,302 |
-| 7 | Split sequences into chunks of 1,000. This was to speed up the predictions and avoid memory errors. | `notebooks/05_Running_predictors_on_train_with_test_removed.ipynb` | — |
-| 8 | Ran all six predictors on the training and test sequences |`bash_scripts/run_CL_dask_all_split.sh`, `bash_scripts/run_CL_dask_all_split_on_missing.sh`, `bash_scripts/run_adhunter_ensemble_gpu.sh`, | — |
-| 9 | Combined all six predictors into a consensus prediction (the fraction of residues that each predictor predicts as part of an activation domain) | `bash_scripts/make_consensus.sh`, To combine separate parts: `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv`, `tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv` | — |
-| 10 | Filter the sequences to make sure we have the correct sets. Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter was added, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655). | `notebooks/checking_seq_sets.ipynb` |  |
-| 11 | Pulls the predictions for the filtered Y1000+ sequences | `loading_and_filtering_yeast_preds.ipynb` | - |
-| 12 | Prepare input for parrot model training. Combines y1000 and non-y1000 predictions and writes the PARROT input files. Also removes PADDLE representative sequences of clusters that contain yeast TFs used in our test set. We added these sequences after original versions of the model, so the clusters are removed here. | `make_parrot_input.ipynb` | - |
-| 12 | Trains the final Madrigal model on all six predictors | `train_parrot_all_six.sh` | - | 
-| 13 | Evaluate on our held out test-set | `predict_parrot_all_six.sh` | 230,289 |
+| Step | What happened | What code was used |
+|---|---|---|
+| 1 | Collected sequences from Y1000+ yeast, PlantTFDB, and InterPro (DBD families), then de-duplicated | `notebooks/00_Downloading_all_InterPro-superfamilies.ipynb` |
+| 2 | Filter the sequences based on length and disorder. Length filter: 53 aa (PADDLE minimum) to 1,442 aa (99th percentile). Disorder filter: at least 20% predicted disorder | `notebooks/01_Input_data_clusters.ipynb` |
+| 3 | Clustered with `mmseqs cluster` at 75% identity, kept one representative per cluster | `notebooks/02_Input_data_clusters_with_mimum_sequence_identity.ipynb` |
+| 5 | Removed training sequences similar to test screen sequences | `notebooks/03_Generating_test_set.ipynb` |
+| 6 | Removed training sequences similar to synthetic sequences | `notebooks/04_Removing_synthetics_from_training.ipynb` |
+| 7 | Split sequences into chunks of 1,000. This was to speed up the predictions and avoid memory errors. | `notebooks/05_Running_predictors_on_train_with_test_removed.ipynb` | 
+| 8 | Ran all six predictors on the training and test sequences |`bash_scripts/run_CL_dask_all_split.sh`, `bash_scripts/run_CL_dask_all_split_on_missing.sh`, `bash_scripts/run_adhunter_ensemble_gpu.sh`, |
+| 9 | Combined all six predictors into a consensus prediction (the fraction of residues that each predictor predicts as part of an activation domain) | `bash_scripts/make_consensus.sh`, To combine separate parts: `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv`, `tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv` |
+| 10 | Filter the sequences to make sure we have the correct sets. Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter was added, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655). | `notebooks/checking_seq_sets.ipynb` |
+| 11 | Pulls the predictions for the filtered Y1000+ sequences | `loading_and_filtering_yeast_preds.ipynb` |
+| 12 | Prepare input for parrot model training. Combines y1000 and non-y1000 predictions and writes the PARROT input files. Also removes PADDLE representative sequences of clusters that contain yeast TFs used in our test set. We added these sequences after original versions of the model, so the clusters are removed here. | `make_parrot_input.ipynb` |
+| 12 | Trains the final Madrigal model on all six predictors | `train_parrot_all_six.sh` | 
+| 13 | Evaluate both regression and classification on our held out test-set | `predict_parrot_all_six.sh`, `notebooks/combined_precision_recall_per_residue.ipynb`, `notebooks/regression/evaluate_parrot.ipynb`, `notebooks/regression/synthetics_and_parrotipynb` | 
 
 **Overlap filter used in steps 6 and 7:** a training sequence was removed if it covered more than 90% of a test or synthetic sequence at 30% or higher sequence identity (`mmseqs search`).
 
@@ -46,7 +46,7 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
   3. Pulled UniProt sequences with evidence levels 1 and 2.
   - File: `data/interpro_uniprot_evid_1_2.fasta`
 
-### 9–10. Running predictors and building consensus
+### 8, 9. Running predictors and building consensus
 
 1. **Tiling:** each protein was tiled with a 1 aa step at each predictor's input length:
    - PADDLE and ADhunterEnsemble: 53 aa
@@ -54,12 +54,6 @@ Madrigal is a bidirectional LSTM (trained with PARROT) that takes a protein sequ
    - ADpred: 30 aa
 2. **Calling AD residues:** a residue counts as an AD residue for a given predictor if it falls in any tile that passes that predictor's published threshold.
 3. **Consensus:** the consensus value for each residue is the fraction of predictors that call it.
-
-### 11. Masked variant
-
-Consensus traces were set to zero wherever they overlap a metapredict2 folded domain.
-
-Across screens, the masked version performed worse than the unmasked consensus.
 
 ### 12. Training
 
@@ -105,32 +99,6 @@ Activities for the test tiles are in `notebooks/regression/screen_test_seqs_with
 
 ---
 
-## Workflow (notebooks and bash scripts)
-
-| Code | What it does |
-|---|---|
-| `notebooks/00_Downloading all InterPro-superfamilies.ipynb` | Downloads UniProt sequences (evidence levels 1 and 2) for the InterPro codes matching the Lambert 2018 DBD families |
-| `notebooks/01_Input data clusters.ipynb` | Combines the three sources, de-duplicates, and applies the length and disorder filters |
-| `notebooks/02_Input data clusters with mimum sequence identity.ipynb` | Clusters sequences with mmseqs2 at 75% identity ("Running mmseqs2" section) |
-| `notebooks/03_Generating test set.ipynb` | Builds the test set from the published screens, then removes test-similar training sequences with mmseqs search ("Trying mmseqs search instead" section) |
-| `notebooks/04_Removing synthetics from training.ipynb` | Removes training sequences similar to the synthetic sequences |
-| `notebooks/05_Running predictors on train with test removed.ipynb` | Drops the Y1000+ (CL) sequences and splits the rest into chunks of 1,000 for prediction |
-| `bash_scripts/run_CL_dask_all_split.sh` | Runs the predictors (parallelized with Dask) on the chunked training sequences |
-| `bash_scripts/run_CL_dask_all_split_on_missing.sh` | Re-runs the predictors on any chunks or tiles missing from the first run |
-| `bash_scripts/run_adhunter_ensemble_gpu.sh` | Runs ADhunterEnsemble on the GPU for each sequence chunk (ADhunterEnsemble is not implemented in dask)|
-| `bash_scripts/make_consensus.sh` | Combines the six predictors into consensus files for each chunk, for the all-six set and each leave-one-out set. Calls python script `other_scripts/generate_consensus_prediction_v2.py` |
-| `head -n 1 pt1_combined_all_six.csv > non_cl_seqs_all_six_combined.csv
-tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv`| Combines all the predictions into a single file. Similar commands were running for the leave-one-out models.  
-| `notebooks/checking_seq_sets.ipynb` | Reconciles the predicted sequences with the final 230,302-sequence training set. It removes 2,492 sequences that were left over from before the synthetics filter, and it splits the remaining sequences into Y1000+ (CL) sequences (95,634) and non-CL sequences (134,655) |
-| `loading_and_filtering_yeast_preds.ipynb` | Pulls the predictions for the filtered Y1000+ sequences |
-| `make_parrot_input.ipynb` | Combines all predictions and writes the PARROT input files, one for the all-six model and one for each leave-one-out model |
-| `train_parrot_all_six.sh` | Trains the final Madrigal model on all six predictors |
-| `train_parrot_no_<predictor>.sh` | Trains the leave-one-out models. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
-| `predict_parrot_all_six.sh` | Runs parrot on the test sequences for regression. |
-| `predict_parrot_no_<predictor>.sh` | Runs leave-one-out models on test sequences for regression. Variants: `no_composition`, `no_ADhunterEnsemble`, `no_ADhunterLite`, `no_tada`, `no_paddle`, `no_adpred` |
-
----
-
 ## Key files
 
 ### Final PARROT inputs, in `compressed_data`
@@ -141,14 +109,3 @@ tail -q -n +2 pt*_combined_all_six.csv >> non_cl_seqs_all_six_combined.csv`| Com
 | `parrot_input_no_<predictor>.tsv.gz` | Inputs for the leave-one-out models |
 
 ---
-
-## Known loose ends
-
-- **Missing sequences:** the final inputs have 230,289 sequences, 13 fewer than the 230,302 in the training set. The missing names are listed in `CLAIRE/missing_seqs.txt`.
-- **DelRosso over-removal:** the training set is missing about 3,000 extra sequences because of the DelRosso tile bug described in step 5.
-
-## Notebooks that were used for development/testing/etc. but did not appear in the final workflow
-| `06_Binarized predictions to traces.ipynb` | Binarizes predictor outputs and converts them into per-residue consensus traces, producing the PARROT input |
-| `07_Masking structured regions.ipynb` | Makes the folded-domain-masked version of the training input using metapredict2 |
-| `Evaluation datasets.ipynb` | Plots predicted vs. measured activity for the consensus models and the individual predictors on each screen |
-| `Eval consensus model.ipynb` | Counts TP and FP on human TFs (work in progress) |
