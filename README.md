@@ -98,7 +98,6 @@ These sequences were used to test the regressive power of our trained model. The
 - **Erkine / Ravarani**: supplementary tables of measured activities.
 - **Arnold**: fold change ≥ 1.5 and P ≤ 1e-5, using tables EV2, EV4, EV5, and EV6.
 - **DelRosso**: 25 randomly chosen TFs out of 1,241. We used a subset so that most human TFs stay in the training data.
-- **Sog1**
 - **Synthetics**
 
 Activities for the test tiles are in `notebooks/regression/screen_test_seqs_with_activities.csv`.
