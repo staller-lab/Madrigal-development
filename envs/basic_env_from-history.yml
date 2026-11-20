@@ -1,0 +1,25 @@
+name: basic_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - ipykernel
+  - rich
+  - logomaker
+  - biopython
+  - tqdm
+  - openpyxl
+  - upsetplot
+  - statsmodels
+  - scikit-learn
+  - scikit-image
+  - xlrd
+  - editdistance
+  - requests
+  - mygene
+  - markovify
+prefix: /Users/claireleblanc/miniconda3/envs/basic_env

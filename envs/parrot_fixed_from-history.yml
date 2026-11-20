@@ -1,0 +1,11 @@
+name: parrot_fixed
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - python=3.9
+  - ipykernel
+  - tqdm
+  - numpy[version='<1.24']
+  - scipy=1.9
+prefix: /global/scratch/users/claireleblanc/conda_environments/parrot_fixed

@@ -106,6 +106,152 @@ Activities for the test tiles are in `notebooks/regression/screen_test_seqs_with
 
 ---
 
+## Software environments
+
+Model development ran across two machines: the notebooks on macOS, and the
+predictor runs and model training on the Berkeley Savio cluster. The
+environment files are in `envs/`, exported in two forms — `*_from-history.yml`
+lists only the packages that were explicitly requested and is the portable file
+to install from, while `*_full.yml` records the complete solved environment and
+is the provenance record.
+
+Create any of them with, for example:
+
+```
+conda env create -f envs/parrot_fixed_from-history.yml
+```
+
+| Environment | Machine | Used for |
+|---|---|---|
+| `basic_env_*.yml` | macOS Tahoe 26.6.2 (Apple M3) | All notebooks in `notebooks/` — sequence collection, filtering, clustering, test-set construction and evaluation |
+| `new_dask_*.yml` | Savio | Running five of the six predictors (`bash_scipts/run_CL_dask_*.sh`) |
+| `adhunter_esm_*.yml` | Savio, GPU | ADhunterEnsemble (`bash_scipts/run_adhunter_ensemble_gpu.sh`) |
+| `parrot_fixed_*.yml` | Savio, GPU | PARROT training and prediction (`bash_scipts/train_parrot_*.sh`, `predict_parrot_*.sh`) |
+| `dask_v3_*.yml` | Savio | Working copy of the predictor environment, with Dask added |
+
+### Notebooks — `basic_env` (macOS)
+
+| Package | Version |
+|---|---|
+| python | 3.13.2 |
+| numpy | 2.2.5 |
+| pandas | 2.2.3 |
+| scipy | 1.15.3 |
+| scikit-learn | 1.6.1 |
+| scikit-image | 0.25.2 |
+| statsmodels | 0.14.4 |
+| matplotlib | 3.10.0 |
+| seaborn | 0.13.2 |
+| biopython | 1.85 |
+| metapredict | 3.0.1 |
+| localCIDER | 0.1.21 |
+| markovify | 0.9.4 |
+| editdistance | 0.8.1 |
+| python-levenshtein | 0.27.1 |
+| torch | 2.11.0 |
+| pytorch-lightning | 2.6.1 |
+| logomaker | 0.8 |
+| upsetplot | 0.9.0 |
+| mygene | 3.2.2 |
+
+### Running five predictors — `new_dask` (Savio)
+
+| Package | Version |
+|---|---|
+| python | 3.10.8 |
+| **ADpred** | **1.3.1** |
+| tensorflow | 2.10.0 |
+| keras | 2.10.0 |
+| pytorch | 2.0.0 (CPU build) |
+| pytorch-lightning | 1.7.7 |
+| torchmetrics | 0.11.4 |
+| dask | 2025.5.1 |
+| dask-jobqueue | 0.9.0 |
+| distributed | 2025.5.1 |
+| numpy | 1.26.4 |
+| pandas | 2.0.0 |
+| scipy | 1.14.1 |
+| scikit-learn | 1.2.2 |
+| statsmodels | 0.14.4 |
+| matplotlib-base | 3.9.2 |
+| seaborn | 0.13.2 |
+| biopython | 1.84 |
+| numba | 0.60.0 |
+| shap | 0.46.0 |
+| localCIDER | 0.1.21 |
+| protfasta | 0.1.15.2 |
+| alphapredict | 1.3.0 |
+| ipyparallel | 8.6.1 |
+
+Of the six predictors, only ADpred was installed as a package. PADDLE, TADA,
+ADhunterLite and the Kotha composition model were run from the source released
+with their respective publications, cited above, and carry no version numbers.
+
+`dask_v3` is a working copy of this environment with Dask added; its export is
+included for completeness.
+
+### ADhunterEnsemble — `adhunter_esm` (Savio, GPU)
+
+Run on a GPU with `--use-gpu`; the CUDA version here matches the `cuda/11.8.0`
+module loaded by the batch script.
+
+| Package | Version |
+|---|---|
+| python | 3.8.16 |
+| **fair-esm** | **2.0.0** |
+| pytorch | 2.0.0 |
+| pytorch-cuda | 11.8 |
+| pytorch-lightning | 1.7.7 |
+| torchmetrics | 0.7.3 |
+| torchvision | 0.15.0 |
+| numpy | 1.24.4 |
+| pandas | 2.0.1 |
+| scipy | 1.10.1 |
+| scikit-learn | 1.3.2 |
+| statsmodels | 0.14.1 |
+| matplotlib | 3.7.1 |
+| seaborn | 0.12.2 |
+| biopython | 1.81 |
+| diamond | 2.1.16 |
+
+### Training and prediction — `parrot_fixed` (Savio, GPU)
+
+Training used one NVIDIA GTX 2080 Ti.
+
+| Package | Version |
+|---|---|
+| python | 3.9.23 |
+| **idptools-parrot** | **1.7.5** |
+| torch | 2.8.0 |
+| pytorch-lightning | 2.6.0 |
+| torchmetrics | 1.8.2 |
+| numpy | 2.0.2 |
+| scipy | 1.13.1 |
+| scikit-learn | 1.6.1 |
+| pandas | 2.3.3 |
+| matplotlib | 3.9.4 |
+| seaborn | 0.13.2 |
+| metapredict | 3.0.1 |
+| protfasta | 0.1.15.2 |
+
+The training and prediction scripts activate a copy of `parrot_fixed` under a
+shared project directory; `sanjana_parrot_fixed_full.yml` is its export, and
+its package versions match `parrot_fixed_full.yml`.
+
+### A note on versions
+
+These environments were exported after the analyses were complete, so some
+package versions are newer than those used at the time; where an executed
+notebook's own metadata differs, the notebook metadata reflects the version
+that produced the published result.
+
+The released predictor is distributed as
+[madrigal-predictor](https://pypi.org/project/madrigal-predictor/) version
+0.1.1, whose own pinned dependencies are listed in
+[consensus_model_package](https://github.com/staller-lab/consensus_model_package).
+
+---
+
 ## Key files
 
 ### Final PARROT inputs, in `compressed_data`
